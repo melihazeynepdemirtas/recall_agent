@@ -3,28 +3,6 @@
   "domain": "cs",
   "cards": [
     {
-      "id": "cs-ostep-ch28-locks-001",
-      "front": "What is a mutex lock?",
-      "answer": "A synchronization primitive that grants exclusive access to a critical section — at most one thread may hold it at any time.\nWhile held, all other threads attempting to acquire it are blocked or spin.",
-      "note": "Think of it as the single key to a one-person bathroom — you can't enter until whoever's inside comes out and hands the key back. \"Mutex\" is literally \"MUTual EXclusion.\"",
-      "code": null,
-      "math": null,
-      "ipa": null,
-      "example": null,
-      "audio": null,
-      "application": null,
-      "application_url": null,
-      "source": "OSTEP ch28 §locks",
-      "source_text": null,
-      "tags": [
-        "recall::definition",
-        "diff::1",
-        "grounding::source",
-        "cs::concurrency",
-        "topic::mutex"
-      ]
-    },
-    {
       "id": "cs-ostep-ch28-locks-002",
       "front": "What does \"mutex\" stand for, and what guarantee does it provide?",
       "answer": "Mutex = mutual exclusion.\nIt guarantees that at most one thread executes a protected critical section concurrently, preventing data races.",
