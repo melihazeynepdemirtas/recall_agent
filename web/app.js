@@ -299,8 +299,10 @@ function mdToHtml(text) {
 
   // 4. Escape everything else, then apply lightweight markdown.
   h = escapeHtml(h)
+    .replace(/\\\[([\s\S]*?)\\\]/g, (_, m) => "\\[" + m.replace(/\n/g, " ") + "\\]")
+    .replace(/\$\$([\s\S]*?)\$\$/g, (_, m) => "$$" + m.replace(/\n/g, " ") + "$$")
     .replace(/^###?\s+(.+)$/gm, "<h4>$1</h4>")
-    .replace(/^\s*[-*]\s+(.+)$/gm, "<div class=\"li\">• $1</div>")
+    .replace(/^\s*[-*]\s+(.+)$/gm, "<div class=\"li\">\u2022 $1</div>")
     .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
     .replace(/(^|[^*])\*([^*\n]+)\*/g, "$1<em>$2</em>")
     .replace(/\n/g, "<br>");
