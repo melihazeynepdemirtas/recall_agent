@@ -1,7 +1,7 @@
 // RECALL service worker — caches the app shell + CDN libs for offline review.
 // Card/state data is NOT cached here (it lives in IndexedDB, written by app.js);
 // GitHub API and tutor calls always go to the network.
-const CACHE = "recall-v5";
+const CACHE = "recall-v6";
 const SHELL = [
   "./", "./index.html", "./app.js", "./manifest.webmanifest", "./icon.svg",
   "https://cdn.jsdelivr.net/npm/ts-fsrs@4.7.0/+esm",
@@ -23,9 +23,8 @@ self.addEventListener("activate", (e) => {
 self.addEventListener("fetch", (e) => {
   const url = new URL(e.request.url);
   // Never cache API / tutor traffic.
-  if (url.hostname === "api.github.com" || url.hostname.includes("anthropic") ||
-      url.hostname.includes("groq") || url.hostname.includes("dictionaryapi") ||
-      url.hostname.includes("workers.dev")) return;
+  if (url.hostname === "api.github.com" || url.hostname.includes("groq") ||
+      url.hostname.includes("dictionaryapi")) return;
   // Cache-first for shell + CDN; fall back to network and cache new GETs.
   e.respondWith(
     caches.match(e.request).then((hit) =>

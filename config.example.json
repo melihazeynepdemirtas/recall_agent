@@ -13,14 +13,12 @@
     "language": false
   },
   "tutor": {
-    "proxy_url": "",
-    "_proxy_comment": "Cloudflare Worker URL for Claude models (optional). Leave empty to use Groq directly.",
-    "default_model": "groq/llama-3.3-70b-versatile",
+    "_comment": "AI tutor uses Groq (free). Get a key at groq.com and enter it in the app's Settings.",
+    "default_model": "groq/openai/gpt-oss-120b",
     "models": [
-      { "id": "groq/llama-3.3-70b-versatile", "label": "Llama 3.3 70B (free)", "max_tokens": 700 },
-      { "id": "claude-haiku-4-5",  "label": "Claude Haiku 4.5",  "max_tokens": 800 },
-      { "id": "claude-sonnet-4-6", "label": "Claude Sonnet 4.6", "max_tokens": 800, "effort": "medium" },
-      { "id": "claude-opus-4-8",   "label": "Claude Opus 4.8",   "max_tokens": 800, "effort": "medium" }
+      { "id": "groq/openai/gpt-oss-120b", "label": "GPT-OSS 120B — reasoning (free)", "max_tokens": 1200 },
+      { "id": "groq/groq/compound", "label": "Groq Compound — web search (free)", "max_tokens": 1200 },
+      { "id": "groq/llama-3.3-70b-versatile", "label": "Llama 3.3 70B (free)", "max_tokens": 700 }
     ]
   }
 }

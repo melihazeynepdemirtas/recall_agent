@@ -217,10 +217,9 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
-# RECALL — local secrets (never commit). The PWA's GitHub PAT and any Anthropic/
-# Groq key live in the phone's localStorage or the Cloudflare Worker, not here.
+# RECALL — local secrets (never commit). The PWA's GitHub PAT and Groq key
+# live only in the phone's localStorage, never in the repo.
 config.local.json
-worker/.dev.vars
 .recall-secrets
 
 # RECALL — review/tutor logs contain personal study data (timestamps, queries).

@@ -10,7 +10,7 @@ A free, iPhone-compatible spaced-repetition app that runs entirely on GitHub Pag
 - **Review on any device** — open the GitHub Pages URL; works offline via service worker
 - **FSRS scheduling** — ts-fsrs runs entirely in the browser, zero AI tokens for scheduling
 - **In-app editing** — edit any card directly in the PWA; changes sync back to GitHub
-- **AI tutor** — tap "Ask" on any card to chat with Groq Llama 3.3 70B (free) or Claude via a proxy
+- **AI tutor** — tap "Ask" on any card for a multi-turn chat with a free Groq model (GPT-OSS 120B reasoning, or Compound for web search)
 - **Language card TTS** — tap 🔊 to hear pronunciation; IPA shown inline
 - **Deck hierarchy** — browse decks grouped by domain (CS / Finance / Language)
 
@@ -66,8 +66,7 @@ Each fork is independent — separate cards, separate FSRS state, separate GitHu
 ## Security
 
 - **No hardcoded keys** — all secrets (GitHub PAT, Groq key) are entered in Settings and stored in `localStorage` on your device only
-- **Claude models** require a proxy URL (Cloudflare Worker with your Anthropic key server-side); direct browser access is blocked
-- **DOMPurify** sanitizes all card content before rendering; CSP header restricts external connections
+- **DOMPurify** sanitizes all card content before rendering; CSP header restricts connections to GitHub, Groq, and the dictionary API only
 - **GitHub PAT scope** — grant `Contents: read & write` on this repo only, not all repos
 
 ---

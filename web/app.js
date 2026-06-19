@@ -43,7 +43,6 @@ const SET = {
   get repo() { return localStorage.getItem("gh_repo") || ""; },
   get branch() { return localStorage.getItem("gh_branch") || "main"; },
   get pat() { return localStorage.getItem("gh_pat") || ""; },
-  get proxy() { return localStorage.getItem("tutor_proxy") || ""; },
   get tutorKey() { return localStorage.getItem("tutor_key") || ""; },
   get model() { return localStorage.getItem("tutor_model") || ""; },
   set(k, v) { localStorage.setItem(k, v); },
@@ -394,9 +393,6 @@ function cardBodyHtml(c) {
 
 // ---------- tutor button label ----------
 function tutorBtnLabel() {
-  const model = SET.model || S.config?.tutor?.default_model || "groq/llama-3.3-70b-versatile";
-  if (model.startsWith("groq/")) return "💬 Ask Llama";
-  if (model.startsWith("claude-")) return "💬 Ask Claude";
   return "💬 Ask Tutor";
 }
 
@@ -425,36 +421,19 @@ async function askTutor(card, history, modelOverride) {
   S.pendingTutor.push(JSON.stringify({ id: card.id, model, ts: nowISO() }));
   persistLocal(); syncSoon();
 
-  // Route by model family — NOT by whether a proxy is configured.
-  // Groq models always go direct to Groq (free key); only Claude models use the proxy.
-  if (model.startsWith("groq/")) {
-    if (!SET.tutorKey) throw new Error("No Groq API key set — add one in Settings.");
-    const r = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${SET.tutorKey}` },
-      body: JSON.stringify({
-        model: model.slice(5), max_tokens: mcfg.max_tokens || 700,
-        messages: [{ role: "system", content: system }, ...history],
-      }),
-    });
-    if (!r.ok) throw new Error(`Groq ${r.status}: ${await r.text()}`);
-    return (await r.json()).choices[0].message.content;
-  }
-
-  // Claude (or any non-Groq) model → proxy only. Keys stay server-side.
-  const proxyUrl = SET.proxy || S.config?.tutor?.proxy_url;
-  if (!proxyUrl) throw new Error("Claude models require a proxy URL — set it in Settings or switch to a free Groq model.");
-  const r = await fetch(proxyUrl, {
-    method: "POST", headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ model, system, messages: history, card_id: card.id, max_tokens: mcfg.max_tokens || 700, effort: mcfg.effort }),
+  // Groq only — free key from groq.com, sent directly from the browser.
+  if (!SET.tutorKey) throw new Error("No Groq API key set — add one in Settings.");
+  const groqModel = model.startsWith("groq/") ? model.slice(5) : model;
+  const r = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${SET.tutorKey}` },
+    body: JSON.stringify({
+      model: groqModel, max_tokens: mcfg.max_tokens || 700,
+      messages: [{ role: "system", content: system }, ...history],
+    }),
   });
-  if (!r.ok) {
-    let detail = "";
-    try { detail = (await r.json()).error || ""; } catch (_) { try { detail = await r.text(); } catch (_) {} }
-    throw new Error(`tutor proxy ${r.status}: ${typeof detail === "string" ? detail : JSON.stringify(detail)}`);
-  }
-  const j = await r.json();
-  return j.text || j.content || JSON.stringify(j);
+  if (!r.ok) throw new Error(`Groq ${r.status}: ${await r.text()}`);
+  return (await r.json()).choices[0].message.content;
 }
 
 // ---------- sync ----------
@@ -628,7 +607,10 @@ function setSuspended(c, val) {
 // doesn't grow, and follow-up questions keep the full conversation context.
 function askUI(card, outEl) {
   const models = S.config?.tutor?.models || [{ id: "groq/llama-3.3-70b-versatile", label: "Llama 3.3 70B (free)" }];
-  let selectedModel = SET.model || S.config?.tutor?.default_model || models[0].id;
+  const fallback = S.config?.tutor?.default_model || models[0].id;
+  let selectedModel = SET.model || fallback;
+  // Heal stale/removed selections (e.g. an old Claude model still in localStorage).
+  if (!models.some((m) => m.id === selectedModel)) { selectedModel = fallback; SET.set("tutor_model", selectedModel); }
   const convo = [];      // [{ role:"user"|"assistant", content }]
   let busy = false;
 
@@ -901,9 +883,7 @@ function viewSettings() {
       <label>Branch</label><input id="sBranch" value="${SET.branch}" />
       <label>GitHub token (PAT)</label><input id="sPat" type="password" value="${SET.pat}" placeholder="github_pat_…" autocomplete="current-password" />
       <hr style="border-color:var(--border);margin:16px 0" />
-      <label>Tutor proxy URL <span class="muted">(recommended for Claude models)</span></label>
-      <input id="sProxy" value="${SET.proxy}" placeholder="https://your-worker.workers.dev" />
-      <label>Groq API key <span class="muted">(free at groq.com — for direct Llama access)</span></label>
+      <label>Groq API key <span class="muted">(free at groq.com — powers the AI tutor)</span></label>
       <input id="sKey" type="password" value="${SET.tutorKey}" placeholder="gsk_…" autocomplete="current-password" />
       <div class="row end" style="margin-top:14px">
         <button class="ghost" id="reloadBtn">↺ Reload from GitHub</button>
@@ -915,7 +895,6 @@ function viewSettings() {
     SET.set("gh_repo", $("#sRepo").value.trim());
     SET.set("gh_branch", $("#sBranch").value.trim() || "main");
     SET.set("gh_pat", $("#sPat").value.trim());
-    SET.set("tutor_proxy", $("#sProxy").value.trim());
     SET.set("tutor_key", $("#sKey").value.trim());
     toast("Saved. Loading…");
     await boot(true);
@@ -934,7 +913,6 @@ async function boot(force = false) {
       if (!SET.owner && cfg.github?.owner) SET.set("gh_owner", cfg.github.owner);
       if (!SET.repo && cfg.github?.repo) SET.set("gh_repo", cfg.github.repo);
       if (cfg.github?.branch && !localStorage.getItem("gh_branch")) SET.set("gh_branch", cfg.github.branch);
-      if (!SET.proxy && cfg.tutor?.proxy_url) SET.set("tutor_proxy", cfg.tutor.proxy_url);
     }
   } catch (_) {}
   if (force || !S.loaded || Object.keys(S.decks).length === 0) {

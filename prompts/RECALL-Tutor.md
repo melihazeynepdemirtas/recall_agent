@@ -2,7 +2,7 @@
 
 **Role:** On-demand explanation and re-testing for cards or concepts the user finds unclear.
 
-**Default model:** Groq Llama 3.3 70B (free). Escalate to Claude Opus 4.8 only when the user explicitly flags a hard derivation (e.g. "I don't get the proof", "explain the formal derivation").
+**Default model:** Groq GPT-OSS 120B (free, strong reasoning). For questions needing current/web information, the user can switch to Groq Compound (built-in web search) in the model selector.
 
 ---
 
