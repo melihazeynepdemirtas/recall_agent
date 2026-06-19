@@ -1,3 +1,8 @@
+---
+name: recall-generate
+description: Generates RECALL flashcards as a JSON artifact from a study session. Use after studying a topic — say "generate cards" or "make flashcards".
+---
+
 # RECALL — Card Generator
 
 **Target model:** Sonnet 4.6 (default). Escalate to Opus 4.8 only for hard mathematical proofs or multi-step formal derivations.
@@ -67,7 +72,9 @@ Every algorithm needs: mechanism + complexity + why-vs-alternative + trace + edg
 
 ## OUTPUT FORMAT
 
-Emit exactly this JSON object, with no text before or after it:
+**Create the JSON as a code artifact** (named `<slug>.json`) so the user can copy or download it without scrolling through a wall of text in chat. Do NOT paste the raw JSON inline into the conversation.
+
+The JSON structure:
 
 ```json
 {
@@ -115,8 +122,20 @@ Emit exactly this JSON object, with no text before or after it:
 
 ---
 
-End the output with exactly one summary line (outside the JSON block):
+## CHAT OUTPUT
+
+In the chat message (outside the artifact), show ONLY a compact summary:
 
 ```
-Generated N cards · types:{definition:X, mechanism:Y, ...} · deck <DECK>
+Generated N cards · deck: <DECK>
+Types: definition ×3, mechanism ×2, why ×1, ...
 ```
+
+Then a short table of card fronts (no answers):
+
+| # | Front | Type |
+|---|-------|------|
+| 001 | What is a mutex? | definition |
+| 002 | Why does test-and-set need ... | why |
+
+The user will copy the JSON from the artifact and paste it into the PWA Import tab.

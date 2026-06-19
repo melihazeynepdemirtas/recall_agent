@@ -34,7 +34,7 @@ Follow the output format and card rules in `prompts/RECALL-Generate.md`.
 
 **GUID format:** `<slug>-NNN` (zero-padded to 3 digits, deterministic — same fact always gets the same id so re-runs update rather than duplicate).
 
-Generate the complete card list as a single JSON object per the format in `prompts/RECALL-Generate.md`. Never produce TSV.
+Generate the complete card list per the format and field rules in `prompts/RECALL-Generate.md`. Write it directly to the file in Step 2 — do not dump the full JSON into chat.
 
 ## Step 2 — Write `cards/<slug>.json`
 
@@ -42,7 +42,7 @@ Read `cards/<slug>.json`:
 - **File exists:** merge generated cards in. For each card, if its `id` already exists → replace that entry; if not → append.
 - **File missing:** write fresh: `{ "deck": "...", "domain": "...", "cards": [...] }`.
 
-Write the final merged JSON (pretty-printed, 2-space indent) back to disk.
+Write the final merged JSON (pretty-printed, 2-space indent) back to disk using the Write tool.
 
 ## Step 3 — Update `state/scheduler.json`
 

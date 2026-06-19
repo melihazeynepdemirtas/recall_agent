@@ -551,6 +551,7 @@ function render() {
 let reviewState = null;
 
 function viewReview() {
+  updateBadge();
   const slugs = Object.keys(S.decks).sort();
   const deckOpts = `<option value="">All decks</option>` +
     slugs.map((s) => {
@@ -623,6 +624,7 @@ function showReviewCard() {
 function doGrade(c, r) {
   gradeCard(c.id, r);
   persistLocal(); syncSoon();
+  updateBadge();
   nextCard();
 }
 function nextCard() {
@@ -921,11 +923,24 @@ function viewSettings() {
       <hr style="border-color:var(--border);margin:16px 0" />
       <label>Groq API key <span class="muted">(free at groq.com — powers the AI tutor)</span></label>
       <input id="sKey" type="password" value="${SET.tutorKey}" placeholder="gsk_…" autocomplete="current-password" />
+      <hr style="border-color:var(--border);margin:16px 0" />
+      <div class="row" style="gap:10px">
+        <div style="flex:1">
+          <b>Reminders</b><br/>
+          <span class="muted" style="font-size:13px">Notify when cards are due</span>
+        </div>
+        <button id="notifToggle" class="${localStorage.getItem("notif_enabled") === "1" && Notification?.permission === "granted" ? "primary" : "ghost"}">${localStorage.getItem("notif_enabled") === "1" && Notification?.permission === "granted" ? "✓ Enabled" : "Enable"}</button>
+      </div>
       <div class="row end" style="margin-top:14px">
         <button class="ghost" id="reloadBtn">↺ Reload from GitHub</button>
         <button class="primary" id="saveSet">Save</button></div>
     </div>
     <p class="muted center" style="margin-top:16px">RECALL · FSRS in-browser · ${allCards().length} cards loaded</p>`;
+  $("#notifToggle").onclick = async () => {
+    const ok = await requestNotifPermission();
+    if (ok) toast("Reminders enabled ✓");
+    viewSettings();
+  };
   $("#saveSet").onclick = async () => {
     SET.set("gh_owner", $("#sOwner").value.trim());
     SET.set("gh_repo", $("#sRepo").value.trim());
@@ -934,6 +949,7 @@ function viewSettings() {
     SET.set("tutor_key", $("#sKey").value.trim());
     toast("Saved. Loading…");
     await boot(true);
+    sendConfigToSW();
     activeTab = "review"; render();
   };
   $("#reloadBtn").onclick = async () => { toast("Reloading…"); await loadFromGitHub(); render(); };
@@ -964,7 +980,90 @@ document.querySelectorAll("nav.tabs button").forEach((b) =>
 window.addEventListener("online", () => { online = true; updatePill(); sync(); });
 window.addEventListener("offline", () => { online = false; updatePill(); });
 
-if ("serviceWorker" in navigator)
+if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("sw.js").catch(() => {});
+  navigator.serviceWorker.addEventListener("message", (e) => {
+    if (e.data?.type === "NAVIGATE") {
+      activeTab = e.data.tab || "review";
+      render();
+    }
+  });
+}
 
-(async () => { await boot(); render(); if (pendingCount()) sync(); })();
+// ---------- app badge ----------
+function updateBadge() {
+  if (!("setAppBadge" in navigator)) return;
+  const n = dueQueue().length;
+  if (n > 0) navigator.setAppBadge(n).catch(() => {});
+  else navigator.clearAppBadge().catch(() => {});
+}
+
+// ---------- send config to SW for periodic sync ----------
+async function sendConfigToSW() {
+  if (!("serviceWorker" in navigator) || !SET.owner || !SET.pat) return;
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    reg.active.postMessage({
+      type: "STORE_CONFIG",
+      owner: SET.owner,
+      repo: SET.repo,
+      branch: SET.branch,
+      pat: SET.pat,
+    });
+  } catch (_) {}
+}
+
+// ---------- notifications ----------
+function isStandalone() {
+  return window.matchMedia("(display-mode: standalone)").matches
+    || navigator.standalone === true;
+}
+
+async function requestNotifPermission() {
+  if (!("Notification" in window)) { toast("Notifications not supported"); return false; }
+  if (!isStandalone()) { toast("Install the app first — add to home screen"); return false; }
+  const perm = await Notification.requestPermission();
+  if (perm === "granted") {
+    localStorage.setItem("notif_enabled", "1");
+    await registerPeriodicSync();
+    return true;
+  }
+  toast("Notification permission denied");
+  return false;
+}
+
+async function registerPeriodicSync() {
+  if (!("serviceWorker" in navigator)) return;
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    if ("periodicSync" in reg) {
+      await reg.periodicSync.register("recall-due", { minInterval: 86400000 });
+    }
+  } catch (_) {}
+}
+
+async function showDueNotification() {
+  if (localStorage.getItem("notif_enabled") !== "1") return;
+  if (!("Notification" in window) || Notification.permission !== "granted") return;
+  const n = dueQueue().length;
+  if (n === 0) return;
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    await reg.showNotification("RECALL", {
+      body: `${n} card${n === 1 ? "" : "s"} due for review`,
+      tag: "recall-due",
+      icon: "./icon.svg",
+      badge: "./icon.svg",
+      data: { tab: "review" },
+    });
+  } catch (_) {}
+}
+
+(async () => {
+  await boot();
+  render();
+  if (pendingCount()) sync();
+  updateBadge();
+  sendConfigToSW();
+  showDueNotification();
+})();
