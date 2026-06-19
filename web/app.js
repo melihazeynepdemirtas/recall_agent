@@ -1119,7 +1119,15 @@ window.addEventListener("online", () => { online = true; updatePill(); sync(); }
 window.addEventListener("offline", () => { online = false; updatePill(); });
 
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("sw.js").catch(() => {});
+  navigator.serviceWorker.register("sw.js").then((reg) => {
+    // Check for updates on every load — don't wait 24h
+    reg.update().catch(() => {});
+  }).catch(() => {});
+  // When a new SW activates and claims this page, reload to get fresh files
+  let reloading = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (!reloading) { reloading = true; window.location.reload(); }
+  });
   navigator.serviceWorker.addEventListener("message", (e) => {
     if (e.data?.type === "NAVIGATE") {
       activeTab = e.data.tab || "review";
