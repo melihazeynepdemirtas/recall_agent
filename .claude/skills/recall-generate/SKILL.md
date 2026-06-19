@@ -19,50 +19,23 @@ Parse from the invocation:
 
 ## Card generation rules
 
-Follow all rules in `prompts/RECALL-Generate.md` exactly:
-- Grounding: source-grounded answers only; `note` may elaborate.
-- Atomic: one fact per card.
-- Dense: every distinct fact, mechanism, edge case, and procedure.
-- Type mix: definition, mechanism, why, distinction, procedure, edge-case, trace, etc.
-- Domain rules (CS / Language / Finance) apply.
+Determine the domain from the deck name or topic, then follow the corresponding skill:
+
+| Domain | Skill file |
+|--------|-----------|
+| German / Language | `prompts/RECALL-German.md` |
+| CS / Theory | `prompts/RECALL-CS.md` |
+| Finance | `prompts/RECALL-Finance.md` |
+
+Read ONLY the relevant domain skill. Do not load the others.
 
 ## Output
 
 Emit exactly:
-1. One JSON block (no preamble, no commentary):
-
-```json
-{
-  "deck": "CS::OSTEP::ch28-locks",
-  "domain": "cs",
-  "cards": [
-    {
-      "id": "<slug>-001",
-      "front": "...",
-      "answer": "...",
-      "note": null,
-      "code": null,
-      "math": null,
-      "ipa": null,
-      "example": null,
-      "audio": null,
-      "application": null,
-      "application_url": null,
-      "source": "OSTEP ch28 §locks",
-      "source_text": null,
-      "tags": ["recall::mechanism", "diff::2", "grounding::model"]
-    }
-  ]
-}
-```
-
-2. One summary line immediately after the closing `}`:
-
-```
-Generated N cards . types:{definition:X, mechanism:Y, ...} . deck <DECK>
-```
+1. One JSON block (the complete card set per the domain skill's format)
+2. One summary line: `Generated N cards · types:{type:X, ...} · deck <DECK>`
 
 ## Next step (remind the user)
 
 After the JSON, add one line:
-> Paste this into the RECALL PWA -> Import tab -> Import button.
+> Paste this into the RECALL PWA → Import tab → Import button.

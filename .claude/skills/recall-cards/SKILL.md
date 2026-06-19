@@ -21,7 +21,12 @@ Example: `CS::OSTEP::ch28-locks` → `cs-ostep-ch28-locks`
 
 ## Step 1 — Read source + generate cards
 
-Follow the output format and card rules in `prompts/RECALL-Generate.md`.
+Determine the domain from the deck name or topic, then follow the corresponding skill:
+- German / Language → `prompts/RECALL-German.md`
+- CS / Theory → `prompts/RECALL-CS.md`
+- Finance → `prompts/RECALL-Finance.md`
+
+Read ONLY the relevant domain skill. Do not load the others.
 
 **Source material:**
 - Read only the relevant chapter section from `cs/`, `language/`, or `finance/` in the repo if it exists (keep token cost low — targeted section reads, not full files).

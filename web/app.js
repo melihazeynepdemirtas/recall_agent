@@ -463,6 +463,16 @@ function cardSystemPrompt(card) {
   );
 }
 
+// ~4 chars per token rough estimate; keep conversation under model context budget
+function trimHistory(history, maxChars) {
+  let total = 0;
+  for (let i = history.length - 1; i >= 0; i--) {
+    total += history[i].content.length;
+    if (total > maxChars) return history.slice(i + 1);
+  }
+  return history;
+}
+
 // history: array of { role: "user" | "assistant", content } — full conversation so far.
 async function askTutor(card, history, modelOverride) {
   const model = modelOverride || SET.model || S.config?.tutor?.default_model || "groq/llama-3.3-70b-versatile";
@@ -475,15 +485,25 @@ async function askTutor(card, history, modelOverride) {
   // Groq only — free key from groq.com, sent directly from the browser.
   if (!SET.tutorKey) throw new Error("No Groq API key set — add one in Settings.");
   const groqModel = model.startsWith("groq/") ? model.slice(5) : model;
+  // Budget: leave room for system prompt + response tokens (~4 chars/token)
+  const ctxBudget = (mcfg.context_window || 8192) * 4;
+  const sysChars = system.length;
+  const maxHistoryChars = ctxBudget - sysChars - (mcfg.max_tokens || 700) * 4;
+  const trimmed = trimHistory(history, Math.max(maxHistoryChars, 2000));
+
   const r = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${SET.tutorKey}` },
     body: JSON.stringify({
       model: groqModel, max_tokens: mcfg.max_tokens || 700,
-      messages: [{ role: "system", content: system }, ...history],
+      messages: [{ role: "system", content: system }, ...trimmed],
     }),
   });
-  if (!r.ok) throw new Error(`Groq ${r.status}: ${await r.text()}`);
+  if (!r.ok) {
+    const body = await r.text();
+    const short = body.length > 200 ? body.slice(0, 200) + "…" : body;
+    throw new Error(`Groq ${r.status}: ${short}`);
+  }
   return (await r.json()).choices[0].message.content;
 }
 
@@ -758,10 +778,12 @@ function askUI(card, outEl) {
     convo.push({ role: "assistant", content: "⏳ …" });
     busy = true; renderThread();
     try {
-      const ans = await askTutor(card, convo.slice(0, -1), selectedModel);
+      // Strip error messages from history before sending — they poison context
+      const clean = convo.slice(0, -1).filter((m) => !m._error);
+      const ans = await askTutor(card, clean, selectedModel);
       convo[convo.length - 1] = { role: "assistant", content: ans };
     } catch (e) {
-      convo[convo.length - 1] = { role: "assistant", content: "⚠ " + e.message };
+      convo[convo.length - 1] = { role: "assistant", content: "⚠ " + e.message, _error: true };
     }
     busy = false; renderThread();
   }
