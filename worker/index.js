@@ -51,7 +51,7 @@ export default {
       });
     }
 
-    const { model, system, user, max_tokens } = body;
+    const { model, system, user, messages, max_tokens } = body;
 
     // Claude models only — reject anything else
     if (!isAllowedModel(model)) {
@@ -60,9 +60,13 @@ export default {
       });
     }
 
-    // Validate required fields
-    if (!system || !user) {
-      return new Response(JSON.stringify({ error: "Missing system or user" }), {
+    // Accept either a multi-turn `messages` array or a single `user` string.
+    const convo = Array.isArray(messages) && messages.length
+      ? messages.filter((m) => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string")
+      : (user ? [{ role: "user", content: user }] : []);
+
+    if (!system || !convo.length) {
+      return new Response(JSON.stringify({ error: "Missing system or messages" }), {
         status: 400, headers: { "Content-Type": "application/json", ...corsHeaders(origin) },
       });
     }
@@ -79,7 +83,7 @@ export default {
         model,
         max_tokens: Math.min(max_tokens || 800, 1500),
         system,
-        messages: [{ role: "user", content: user }],
+        messages: convo,
       }),
     });
 

@@ -401,18 +401,26 @@ function tutorBtnLabel() {
 }
 
 // ---------- tutor ----------
-async function askTutor(card, question, modelOverride) {
-  const model = modelOverride || SET.model || S.config?.tutor?.default_model || "groq/llama-3.3-70b-versatile";
-  const mcfg = (S.config?.tutor?.models || []).find((m) => m.id === model) || {};
-  // Trim source_text to keep token count low for free-tier models.
+// Card grounding goes into the system prompt once; the conversation itself
+// stays a clean user/assistant exchange so follow-up questions keep context.
+function cardSystemPrompt(card) {
   const srcSnippet = card.source_text ? card.source_text.slice(0, 400) : "";
   const grounding = [card.source, srcSnippet, card.answer, card.note]
     .filter(Boolean).join("\n");
-  const system =
-    "You are a study tutor. Explain the flashcard concept clearly and in depth, " +
-    "grounded in the provided source. Add helpful intuition and a concrete example. " +
-    "Be concise and pedagogical; do not invent facts beyond the source without flagging them.";
-  const user = `CARD\nQ: ${card.front}\nA: ${card.answer}\n\nSOURCE/CONTEXT:\n${grounding}\n\nMY QUESTION: ${question}`;
+  return (
+    "You are a study tutor helping with one flashcard. Explain clearly and in depth, " +
+    "grounded in the provided source. Add intuition and concrete examples. Be concise and " +
+    "pedagogical; do not invent facts beyond the source without flagging them. " +
+    "The student may ask follow-up questions — keep the thread coherent.\n\n" +
+    `CARD\nQ: ${card.front}\nA: ${card.answer}\n\nSOURCE/CONTEXT:\n${grounding}`
+  );
+}
+
+// history: array of { role: "user" | "assistant", content } — full conversation so far.
+async function askTutor(card, history, modelOverride) {
+  const model = modelOverride || SET.model || S.config?.tutor?.default_model || "groq/llama-3.3-70b-versatile";
+  const mcfg = (S.config?.tutor?.models || []).find((m) => m.id === model) || {};
+  const system = cardSystemPrompt(card);
 
   S.pendingTutor.push(JSON.stringify({ id: card.id, model, ts: nowISO() }));
   persistLocal(); syncSoon();
@@ -426,7 +434,7 @@ async function askTutor(card, question, modelOverride) {
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${SET.tutorKey}` },
       body: JSON.stringify({
         model: model.slice(5), max_tokens: mcfg.max_tokens || 700,
-        messages: [{ role: "system", content: system }, { role: "user", content: user }],
+        messages: [{ role: "system", content: system }, ...history],
       }),
     });
     if (!r.ok) throw new Error(`Groq ${r.status}: ${await r.text()}`);
@@ -438,7 +446,7 @@ async function askTutor(card, question, modelOverride) {
   if (!proxyUrl) throw new Error("Claude models require a proxy URL — set it in Settings or switch to a free Groq model.");
   const r = await fetch(proxyUrl, {
     method: "POST", headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ model, system, user, card_id: card.id, question, max_tokens: mcfg.max_tokens || 700, effort: mcfg.effort }),
+    body: JSON.stringify({ model, system, messages: history, card_id: card.id, max_tokens: mcfg.max_tokens || 700, effort: mcfg.effort }),
   });
   if (!r.ok) {
     let detail = "";
@@ -615,42 +623,83 @@ function setSuspended(c, val) {
   persistLocal(); syncSoon();
 }
 
-// --- Ask UI (tutor) ---
+// --- Ask UI (tutor chat) ---
+// Multi-turn: the thread scrolls inside its own fixed-height box so the page
+// doesn't grow, and follow-up questions keep the full conversation context.
 function askUI(card, outEl) {
   const models = S.config?.tutor?.models || [{ id: "groq/llama-3.3-70b-versatile", label: "Llama 3.3 70B (free)" }];
-  const cur = SET.model || S.config?.tutor?.default_model || models[0].id;
+  let selectedModel = SET.model || S.config?.tutor?.default_model || models[0].id;
+  const convo = [];      // [{ role:"user"|"assistant", content }]
+  let busy = false;
+
   outEl.innerHTML = `
     <div class="card tutor-card">
-      <textarea id="askQ" placeholder="What would you like to understand better?" rows="2"></textarea>
-      <div class="row" style="margin-top:8px;gap:6px">
-        <button class="ghost" id="modelToggle" style="font-size:12px">⚙ ${models.find(m=>m.id===cur)?.label || cur}</button>
+      <div class="row" style="gap:6px;margin-bottom:8px">
+        <span class="muted" style="font-size:12px">💬 Tutor chat</span>
         <span class="grow"></span>
-        <button class="primary" id="askGo">Ask</button>
+        <button class="ghost btn-sm" id="modelToggle">⚙ ${models.find(m=>m.id===selectedModel)?.label || selectedModel}</button>
+        <button class="ghost btn-sm" id="chatClear" title="Clear conversation">🗑</button>
       </div>
-      <div id="modelSel" class="hidden" style="margin-top:6px">
+      <div id="modelSel" class="hidden" style="margin-bottom:8px">
         <select id="askModel">${models.map((m) =>
-          `<option value="${m.id}" ${m.id === cur ? "selected" : ""}>${m.label}</option>`).join("")}</select>
+          `<option value="${m.id}" ${m.id === selectedModel ? "selected" : ""}>${m.label}</option>`).join("")}</select>
       </div>
-      <div id="askAns"></div>
+      <div id="chatThread" class="chat-thread"></div>
+      <div class="chat-input">
+        <textarea id="askQ" placeholder="Ask about this card… (Enter to send)" rows="1"></textarea>
+        <button class="primary" id="askGo">Send</button>
+      </div>
     </div>`;
 
-  let selectedModel = cur;
+  const thread = $("#chatThread");
+
+  function renderThread() {
+    if (!convo.length) {
+      thread.innerHTML = `<p class="muted" style="font-size:13px;margin:4px 2px">Ask a question to start. Follow-ups keep the context.</p>`;
+      return;
+    }
+    thread.innerHTML = convo.map((m) =>
+      m.role === "user"
+        ? `<div class="msg msg-user">${mdToHtml(m.content)}</div>`
+        : `<div class="msg msg-bot">${mdToHtml(m.content)}</div>`
+    ).join("");
+    renderMath(thread);
+    thread.scrollTop = thread.scrollHeight;
+  }
+  renderThread();
+
   $("#modelToggle").onclick = () => $("#modelSel").classList.toggle("hidden");
   $("#askModel").onchange = (e) => {
     selectedModel = e.target.value;
     SET.set("tutor_model", selectedModel);
     $("#modelToggle").textContent = `⚙ ${models.find(m=>m.id===selectedModel)?.label || selectedModel}`;
   };
-  $("#askQ").focus();
-  $("#askGo").onclick = async () => {
+  $("#chatClear").onclick = () => { convo.length = 0; renderThread(); $("#askQ").focus(); };
+
+  async function send() {
+    if (busy) return;
     const qv = $("#askQ").value.trim(); if (!qv) return;
-    $("#askAns").innerHTML = `<p class="muted">⏳ Waiting for response…</p>`;
+    $("#askQ").value = "";
+    convo.push({ role: "user", content: qv });
+    convo.push({ role: "assistant", content: "⏳ …" });
+    busy = true; renderThread();
     try {
-      const ans = await askTutor(card, qv, selectedModel);
-      $("#askAns").innerHTML = `<div class="tutor-ans">${mdToHtml(ans)}</div>`;
-      renderMath($("#askAns"));
-    } catch (e) { $("#askAns").innerHTML = `<p class="muted">⚠ ${DOMPurify.sanitize(e.message)}</p>`; }
+      const ans = await askTutor(card, convo.slice(0, -1), selectedModel);
+      convo[convo.length - 1] = { role: "assistant", content: ans };
+    } catch (e) {
+      convo[convo.length - 1] = { role: "assistant", content: "⚠ " + e.message };
+    }
+    busy = false; renderThread();
+  }
+
+  $("#askGo").onclick = send;
+  const ta = $("#askQ");
+  ta.focus();
+  // Enter sends; Shift+Enter makes a newline. Auto-grow up to a few rows.
+  ta.onkeydown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
   };
+  ta.oninput = () => { ta.style.height = "auto"; ta.style.height = Math.min(ta.scrollHeight, 96) + "px"; };
 }
 
 // --- Browse ---
