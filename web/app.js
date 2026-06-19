@@ -850,14 +850,13 @@ function viewBrowse() {
       return `<details class="deck-item">
         <summary class="deck-summary">
           <span class="deck-name">${DOMPurify.sanitize(d.deck)}</span>
-          <span class="deck-meta"><span class="pill">${d.cards.length}</span><span class="pill ${due ? "" : "ok"}">${due} due</span></span>
+          <span class="deck-meta">
+            <span class="pill">${d.cards.length}</span>
+            <span class="pill ${due ? "" : "ok"}">${due} due</span>
+            <button class="ghost btn-sm" style="color:var(--bad);padding:2px 8px" data-del-deck="${s}">🗑</button>
+          </span>
         </summary>
-        <div class="deck-cards">
-          ${cardsHtml}
-          <div class="row end" style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border)">
-            <button class="ghost btn-sm" style="color:var(--bad)" data-del-deck="${s}">Delete deck</button>
-          </div>
-        </div>
+        <div class="deck-cards">${cardsHtml}</div>
       </details>`;
     }).join("");
     return `<details class="domain-group" open>
