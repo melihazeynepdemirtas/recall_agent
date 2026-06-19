@@ -547,6 +547,7 @@ async function sync() {
   try {
     for (const slug of [...S.dirtyDecks]) {
       const d = S.decks[slug];
+      if (!d) { S.dirtyDecks.delete(slug); continue; }
       const cur = await ghGetFile(`cards/${slug}.json`);
       const text = JSON.stringify({ deck: d.deck, domain: d.domain, cards: d.cards }, null, 2) + "\n";
       d.sha = await ghPutFile(`cards/${slug}.json`, text, cur.sha, `recall: update ${slug}`);
