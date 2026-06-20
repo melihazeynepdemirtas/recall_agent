@@ -828,7 +828,7 @@ function askUI(card) {
     SET.set("tutor_model", selectedModel);
     q("#tutorModelToggle").textContent = `⚙ ${models.find(m=>m.id===selectedModel)?.label || selectedModel}`;
   };
-  q("#tutorClear").onclick = () => { convo.length = 0; renderThread(); q("#tutorQ").focus(); };
+  q("#tutorClear").onclick = () => { convo.length = 0; renderThread(); };
 
   async function send() {
     if (busy) return;
