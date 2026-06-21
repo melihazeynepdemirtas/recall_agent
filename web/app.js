@@ -278,7 +278,7 @@ function mdToHtml(text) {
     const i = blocks.length;
     const label = lang ? `<div class="code-lang">${escapeHtml(lang)}</div>` : "";
     blocks.push(`${label}<pre class="code"><code>${escapeHtml(code.replace(/\n$/, ""))}</code></pre>`);
-    return ` B${i} `;
+    return `B${i}`;
   });
 
   // 2. Protect inline code spans too.
@@ -286,7 +286,7 @@ function mdToHtml(text) {
   h = h.replace(/`([^`\n]+)`/g, (_, code) => {
     const i = inlines.length;
     inlines.push(`<code class="inline">${escapeHtml(code)}</code>`);
-    return ` I${i} `;
+    return `I${i}`;
   });
 
   // 3. Extract markdown tables (runs of lines starting with |) before escaping.
@@ -310,7 +310,7 @@ function mdToHtml(text) {
       for (const row of rows) t += `<tr>` + parseCells(row).map((c) => `<td>${escapeHtml(c)}</td>`).join("") + `</tr>`;
       t += "</tbody></table></div>";
       const ti = tables.length; tables.push(t);
-      out.push(` T${ti} `); buf = [];
+      out.push(`T${ti}`); buf = [];
     };
     for (const line of tlines) {
       if (line.trimStart().startsWith("|")) buf.push(line);
@@ -330,12 +330,16 @@ function mdToHtml(text) {
     .replace(/(^|[^*])\*([^*\n]+)\*/g, "$1<em>$2</em>")
     .replace(/\n/g, "<br>");
 
-  // 5. Restore protected spans/blocks.
-  // Tables/blocks first — they may contain I{n} placeholders in their cells.
-  // Inline regex uses lookahead because parseCells trims trailing spaces.
-  h = h.replace(/ T(\d+) (<br>)?/g, (_, i) => tables[Number(i)])
-       .replace(/ B(\d+) (<br>)?/g, (_, i) => blocks[Number(i)])
-       .replace(/ I(\d+)(?= |<|$)/g, (_, i) => inlines[Number(i)]);
+  // 5. Restore protected spans/blocks (tables first — they contain inline placeholders).
+  const phRe = (tag) => new RegExp("" + tag + "(\\d+)", "g");
+  h = h.replace(phRe("T"), (_, i) => tables[Number(i)])
+       .replace(phRe("B"), (_, i) => blocks[Number(i)])
+       .replace(phRe("I"), (_, i) => inlines[Number(i)]);
+
+  // 6. Tighten spacing: strip <br> around block elements that have their own margins.
+  h = h.replace(/(<br>)+(\s*<(?:h4|div class="li"|div class="tbl-wrap"|div class="code-lang"|pre class="code"))/g, "$2")
+       .replace(/(<\/h4>|<\/pre>|<\/div>|<\/table>)(<br>)+/g, "$1")
+       .replace(/(<br>){3,}/g, "<br>");
   return DOMPurify.sanitize(h);
 }
 function renderMath(el) {
