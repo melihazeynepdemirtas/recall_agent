@@ -42,3 +42,4 @@
 {"id":"leetcode-missing-union-001","model":"groq/llama-3.3-70b-versatile","ts":"2026-06-21T11:29:46.863Z"}
 {"id":"leetcode-missing-union-002","model":"groq/llama-3.3-70b-versatile","ts":"2026-06-21T11:35:19.099Z"}
 {"id":"leetcode-missing-union-002","model":"groq/llama-3.3-70b-versatile","ts":"2026-06-21T11:36:07.231Z"}
+{"id":"leetcode-missing-union-002","model":"groq/openai/gpt-oss-120b","ts":"2026-06-23T08:26:59.441Z"}
