@@ -29,7 +29,8 @@
         "grounding::source",
         "lang::de",
         "topic::grammar-case"
-      ]
+      ],
+      "suspended": true
     },
     {
       "id": "dea2g-002",
