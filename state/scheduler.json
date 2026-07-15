@@ -1,1 +1,74 @@
-{}
+{
+  "dea2g-001": {
+    "due": "2026-07-15T18:13:55.189Z",
+    "stability": 0,
+    "difficulty": 0,
+    "elapsed_days": 0,
+    "scheduled_days": 0,
+    "learning_steps": 0,
+    "reps": 0,
+    "lapses": 0,
+    "state": 0,
+    "last_review": null
+  },
+  "dea2g-002": {
+    "due": "2026-07-15T18:13:55.189Z",
+    "stability": 0,
+    "difficulty": 0,
+    "elapsed_days": 0,
+    "scheduled_days": 0,
+    "learning_steps": 0,
+    "reps": 0,
+    "lapses": 0,
+    "state": 0,
+    "last_review": null
+  },
+  "dea2g-003": {
+    "due": "2026-07-15T18:13:55.189Z",
+    "stability": 0,
+    "difficulty": 0,
+    "elapsed_days": 0,
+    "scheduled_days": 0,
+    "learning_steps": 0,
+    "reps": 0,
+    "lapses": 0,
+    "state": 0,
+    "last_review": null
+  },
+  "dea2g-004": {
+    "due": "2026-07-15T18:13:55.189Z",
+    "stability": 0,
+    "difficulty": 0,
+    "elapsed_days": 0,
+    "scheduled_days": 0,
+    "learning_steps": 0,
+    "reps": 0,
+    "lapses": 0,
+    "state": 0,
+    "last_review": null
+  },
+  "dea2g-005": {
+    "due": "2026-07-15T18:13:55.189Z",
+    "stability": 0,
+    "difficulty": 0,
+    "elapsed_days": 0,
+    "scheduled_days": 0,
+    "learning_steps": 0,
+    "reps": 0,
+    "lapses": 0,
+    "state": 0,
+    "last_review": null
+  },
+  "dea2g-006": {
+    "due": "2026-07-15T18:13:55.189Z",
+    "stability": 0,
+    "difficulty": 0,
+    "elapsed_days": 0,
+    "scheduled_days": 0,
+    "learning_steps": 0,
+    "reps": 0,
+    "lapses": 0,
+    "state": 0,
+    "last_review": null
+  }
+}
