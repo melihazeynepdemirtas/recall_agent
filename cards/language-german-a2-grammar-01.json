@@ -1,0 +1,178 @@
+{
+  "deck": "Language::German::A2-Grammar-01",
+  "domain": "language",
+  "cards": [
+    {
+      "id": "dea2g-001",
+      "front": "How do possessive pronouns (mein/dein) change by case and gender?",
+      "answer": "Possessive pronouns take the SAME endings as the indefinite article 'ein' in each case.\nMasculine: mein (Nom) / meinen (Akk) / meinem (Dat) / meines+s (Gen)\nFeminine: meine / meine / meiner / meiner\nNeuter: mein / mein / meinem / meines+s\nPlural: meine / meine / meinen+n / meiner\nThis applies to mein, dein, sein, ihr, unser, euer, Ihr — only the stem changes, the endings are always the same.",
+      "note": "Memory trick: possessive endings mirror 'ein-words' (kein, mein, dein...). If you know how 'kein' declines, you know them all.",
+      "code": "Nom: mein / meine / mein / meine\nAkk: meinen / meine / mein / meine\nDat: meinem / meiner / meinem / meinen(n)\nGen: meines(s) / meiner / meines(s) / meiner",
+      "math": null,
+      "ipa": null,
+      "example": "Ich fahre mit meinem Bruder. (I'm traveling with my brother.)",
+      "audio": null,
+      "application": "Talking about family or belongings in the ÖSD A2 speaking exam (e.g. 'in meiner Familie').",
+      "application_url": null,
+      "prompts": [
+        "Dativ feminine ending?",
+        "Dativ masculine ending?",
+        "Which case for 'mit'?",
+        "Same pattern as which article type?"
+      ],
+      "cloze": "Ich wohne mit ___ Familie. (I live with ___ family.) [feminine, Dativ]",
+      "source": "User conversation - grammar explanation",
+      "source_text": null,
+      "tags": [
+        "recall::grammar-pattern",
+        "diff::3",
+        "grounding::source",
+        "lang::de",
+        "topic::grammar-case"
+      ]
+    },
+    {
+      "id": "dea2g-002",
+      "front": "Why is it 'in meiner Familie' and not 'in meinem Familie'?",
+      "answer": "Two rules combine here:\n1) 'Familie' is feminine (die Familie).\n2) 'in' is a two-way preposition (Wechselpräposition) — used with Dativ when describing a static location/state (no movement), Akkusativ when describing movement toward something.\n'Wie viele Personen sind in deiner Familie?' describes a state, not motion, so Dativ is used. Feminine + Dativ = the ending -er, giving 'meiner'.",
+      "note": "Chain the logic: state (not motion) → Dativ → feminine noun → '-er' ending.",
+      "code": null,
+      "math": null,
+      "ipa": null,
+      "example": "Wir sind vier Personen in meiner Familie. (There are four people in my family.)",
+      "audio": null,
+      "application": "Answering 'Wie viele Personen sind in deiner Familie?' in the ÖSD A2 speaking exam.",
+      "application_url": null,
+      "prompts": [
+        "Gender of Familie?",
+        "Motion or state?",
+        "Which case follows?",
+        "Resulting ending?"
+      ],
+      "cloze": "Wie viele Personen sind in ___ Familie? (How many people are in ___ family?)",
+      "source": "User conversation - grammar explanation",
+      "source_text": null,
+      "tags": [
+        "recall::distinction",
+        "diff::3",
+        "grounding::source",
+        "lang::de",
+        "topic::grammar-case"
+      ]
+    },
+    {
+      "id": "dea2g-003",
+      "front": "What are Wechselpräpositionen and how do you choose Dativ vs. Akkusativ?",
+      "answer": "Nine prepositions can take either Dativ or Akkusativ depending on meaning: in, an, auf, über, unter, vor, hinter, neben, zwischen.\nRule: 'Wohin?' (movement toward a place) → Akkusativ. 'Wo?' (location/state, no movement) → Dativ.\nTest: does the sentence describe going somewhere (motion) or being/staying somewhere (state)?",
+      "note": "Mnemonic: 'Wohin' has motion built into the word (hin = toward) → Akkusativ. 'Wo' alone = just location → Dativ.",
+      "code": "9 prepositions: in, an, auf, über, unter, vor, hinter, neben, zwischen\nWo? (state) -> Dativ\nWohin? (motion) -> Akkusativ",
+      "math": null,
+      "ipa": null,
+      "example": "Ich bin in der Schule. (I am at school.) vs. Ich gehe in die Schule. (I am going to school.)",
+      "audio": null,
+      "application": "Describing where you live, work, or study during the ÖSD A2 speaking section.",
+      "application_url": null,
+      "prompts": [
+        "List the 9 prepositions?",
+        "Motion vs. location?",
+        "Case for 'Wo'?",
+        "Case for 'Wohin'?"
+      ],
+      "cloze": "Das Buch liegt auf ___ Tisch. (The book is lying on ___ table.) [state, Dativ]",
+      "source": "User conversation - grammar explanation",
+      "source_text": null,
+      "tags": [
+        "recall::grammar-rule",
+        "diff::3",
+        "grounding::source",
+        "lang::de",
+        "topic::grammar-case"
+      ]
+    },
+    {
+      "id": "dea2g-004",
+      "front": "Why does 'der' sometimes appear with feminine nouns, like 'in der Schule'?",
+      "answer": "'der' is not only the masculine Nominativ article — it also appears as:\n1) Feminine Dativ (in der Schule)\n2) Feminine Genitiv (das Auto der Frau)\n3) Plural Genitiv (der Kinder)\nThe gender of a noun never changes; only the article's form changes based on case. Seeing 'der' does not automatically mean masculine — check the case and gender together.",
+      "note": "Don't pattern-match 'der = masculine'. Always ask: which case, which gender?",
+      "code": null,
+      "math": null,
+      "ipa": null,
+      "example": "Ich bin in der Schule. (I am at school.) — feminine Dativ, not masculine.",
+      "audio": null,
+      "application": "Avoiding a common beginner mistake when using 'in + die-nouns' in Dativ.",
+      "application_url": null,
+      "prompts": [
+        "Name 2 other uses of 'der' besides masc. Nominativ?",
+        "Does gender ever change?",
+        "What actually changes?"
+      ],
+      "cloze": "Ich bin in ___ Küche. (I am in ___ kitchen.) [feminine, Dativ]",
+      "source": "User conversation - grammar explanation",
+      "source_text": null,
+      "tags": [
+        "recall::grammar-rule",
+        "diff::2",
+        "grounding::source",
+        "lang::de",
+        "topic::grammar-case"
+      ]
+    },
+    {
+      "id": "dea2g-005",
+      "front": "zuhören vs. hören — why does zuhören take Dativ (mir) instead of Akkusativ (mich)?",
+      "answer": "'hören' (to hear) is a normal verb taking Akkusativ: 'Du hörst mich nicht' (You don't hear me).\n'zuhören' (to listen to) is a separate, separable verb (zu + hören) that grammatically requires Dativ, regardless of Turkish/English logic: 'Sie hören mir nicht zu' (You're not listening to me/to me).\nDativ-requiring verbs must be memorized individually; they don't always match the direct-object logic of Turkish or English.",
+      "note": "Contrastive: Turkish 'beni dinlemiyorsun' suggests direct object (Akkusativ) logic, but German zuhören is grammatically Dativ. Compare to helfen, which happens to match Turkish 'sana' = Dativ.",
+      "code": null,
+      "math": null,
+      "ipa": null,
+      "example": "Hör mir bitte zu! (Please listen to me!)",
+      "audio": null,
+      "application": "Avoiding a very common Turkish-speaker mistake (using mich instead of mir) with zuhören.",
+      "application_url": null,
+      "prompts": [
+        "Case for hören?",
+        "Case for zuhören?",
+        "Is this predictable from Turkish?",
+        "One example verb that DOES match Turkish logic?"
+      ],
+      "cloze": "Ich höre ___ nicht zu. (I'm not listening to ___.) [dative pronoun]",
+      "source": "User conversation - grammar explanation",
+      "source_text": null,
+      "tags": [
+        "recall::distinction",
+        "diff::4",
+        "grounding::source",
+        "lang::de",
+        "topic::grammar-verbs"
+      ]
+    },
+    {
+      "id": "dea2g-006",
+      "front": "Which common verbs require Dativ, and how does that compare to Turkish?",
+      "answer": "Dativ-requiring verbs: helfen (to help), zuhören (to listen to), danken (to thank), gefallen (to please/like), gehören (to belong to).\nSome match Turkish possessive/dative logic (helfen -> sana yardım ediyorum = 'to you'), others don't (zuhören sounds like 'seni' in Turkish but is Dativ in German). These must be memorized as a list rather than derived from Turkish translation.",
+      "note": "Group them as a set and drill them together rather than translating word by word from Turkish.",
+      "code": "helfen (yardım etmek), zuhören (dinlemek), danken (teşekkür etmek), gefallen (hoşuna gitmek), gehören (ait olmak) — all take Dativ",
+      "math": null,
+      "ipa": null,
+      "example": "Das gefällt mir sehr. (I like that a lot / that pleases me.)",
+      "audio": null,
+      "application": "Common everyday phrases usable in the ÖSD A2 speaking exam.",
+      "application_url": null,
+      "prompts": [
+        "List 3 Dativ verbs?",
+        "Which one matches Turkish 'sana'?",
+        "Which one is counterintuitive?"
+      ],
+      "cloze": "Ich danke ___ für die Hilfe. (I thank ___ for the help.) [dative pronoun]",
+      "source": "User conversation - grammar explanation",
+      "source_text": null,
+      "tags": [
+        "recall::grammar-rule",
+        "diff::3",
+        "grounding::source",
+        "lang::de",
+        "topic::grammar-verbs"
+      ]
+    }
+  ]
+}
