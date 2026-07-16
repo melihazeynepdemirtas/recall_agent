@@ -24,16 +24,16 @@
     "last_review": "2026-07-16T13:40:47.376Z"
   },
   "dea2g-003": {
-    "due": "2026-07-15T18:13:55.189Z",
-    "stability": 0,
-    "difficulty": 0,
+    "due": "2026-07-16T13:50:58.968Z",
+    "stability": 3.173,
+    "difficulty": 5.28243442,
     "elapsed_days": 0,
     "scheduled_days": 0,
     "learning_steps": 0,
-    "reps": 0,
+    "reps": 1,
     "lapses": 0,
-    "state": 0,
-    "last_review": null
+    "state": 1,
+    "last_review": "2026-07-16T13:40:58.968Z"
   },
   "dea2g-004": {
     "due": "2026-07-15T18:13:55.189Z",
